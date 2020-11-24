@@ -13,14 +13,14 @@ def login(driver, username, password):
     btn.click()
     time.sleep(2.5)
 
-def search_github(username, password, page=1):
+def search_github(username, password, page, end_page):
     opts = Options()
     opts.add_argument('--headless')
     driver = webdriver.Chrome(options=opts)
     driver.get(f'https://github.com/search?l=KiCad+Schematic&q=EESchema+Schematic&type=Code&p={page}')
     login(driver, username, password)
 
-    while True:
+    for _ in range(page, end_page):
         links = driver.find_elements_by_css_selector('.code-list-item .f4 a')
         file_urls = [ link.get_attribute('href') for link in links ]
         for file_url in file_urls:
@@ -34,21 +34,9 @@ def search_github(username, password, page=1):
             break
     driver.quit()
 
-    # btn = driver.find_element_by_class_name('search-button')
-    # btn.click()
-    # time.sleep(0.5)
-    # cells = driver.find_elements_by_class_name('MuiTableCell-root')
-    # result_elements = [cell for cell in cells if 'Items)' in cell.text]
-    # categories = [ cell.find_element_by_tag_name('a').text for cell in result_elements ]
-    # if len(categories) == 0:
-        # items = [ element for element in driver.find_elements_by_tag_name('li') if 'Items)' in element.text ]
-        # categories = [ item.find_element_by_tag_name('a').text for item in items ]
-
-    # driver.quit()
-    # return categories
-
 username = os.environ['GITHUB_USERNAME']
 password = os.environ['GITHUB_PASSWORD']
-page = sys.argv[1] if len(sys.argv) > 1 else 1
-for file_url in search_github(username, password, page):
+start_page = int(sys.argv[1]) if len(sys.argv) > 1 else 1
+end_page = int(sys.argv[2]) if len(sys.argv) > 2 else start_page + 25
+for file_url in search_github(username, password, start_page, end_page):
     print(file_url)
