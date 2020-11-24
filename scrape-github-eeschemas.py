@@ -13,30 +13,32 @@ def login(driver, username, password):
     btn.click()
     time.sleep(2.5)
 
-def search_github(username, password, page, end_page):
+def search_github(username, password):
     opts = Options()
-    opts.add_argument('--headless')
+    #opts.add_argument('--headless')
     driver = webdriver.Chrome(options=opts)
-    driver.get(f'https://github.com/search?l=KiCad+Schematic&q=EESchema+Schematic&type=Code&p={page}')
+    driver.get('https://github.com/search?l=KiCad+Schematic&q=EESchema+Schematic&type=Code')
     login(driver, username, password)
 
-    for _ in range(page, end_page):
-        links = driver.find_elements_by_css_selector('.code-list-item .f4 a')
-        file_urls = [ link.get_attribute('href') for link in links ]
-        for file_url in file_urls:
-            yield file_url
-        next_link = driver.find_element_by_css_selector('.next_page')
-        has_next_page = next_link.tag_name == 'a'
-        if has_next_page:
-            next_url = next_link.get_attribute('href')
-            driver.get(next_url)
-        else:
-            break
+    page_batch_size = 10
+    while True:
+        for _ in range(page_batch_size):
+            result_links = driver.find_elements_by_css_selector('.code-list-item .f4 a')
+            for anchor in result_links:
+                yield anchor.get_attribute('href')
+            next_link = driver.find_element_by_css_selector('.next_page')
+            has_next_page = next_link.tag_name == 'a'
+            if has_next_page:
+                next_url = next_link.get_attribute('href')
+                driver.get(next_url)
+            else:
+                break
+        print('----- taking a break for a bit... -----', file=sys.stderr)
+        time.sleep(20)
+
     driver.quit()
 
 username = os.environ['GITHUB_USERNAME']
 password = os.environ['GITHUB_PASSWORD']
-start_page = int(sys.argv[1]) if len(sys.argv) > 1 else 1
-end_page = int(sys.argv[2]) if len(sys.argv) > 2 else start_page + 25
-for file_url in search_github(username, password, start_page, end_page):
+for file_url in search_github(username, password):
     print(file_url)
