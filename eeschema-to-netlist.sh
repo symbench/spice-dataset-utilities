@@ -60,11 +60,28 @@ echo "Found file window $FWID"
 xdotool key --window $FWID "Return"
 
 # Wait for the window to close
+    # TODO: if not closed, we should check for another window
+function tryCloseAnnotateWindow() {
+    AWID="$(xdotool search --onlyvisible --classname Eeschema | grep -v $EWID | grep -v $MWID | grep -v $FWID || true)"
+    echo "Trying to close annotate window. AWID: $AWID"
+    if [[ "$AWID" -ne "" ]]; then
+        eval $(xwininfo -id $AWID |
+        sed -n -e "s/^ \+Width: \+\([0-9]\+\).*/w=\1/p" \
+               -e "s/^ \+Height: \+\([0-9]\+\).*/h=\1/p" )
+        echo -n "$w $h"
+        BTN_X=$(echo "$w * 0.95" | bc)
+        BTN_Y=$(echo "$h * 0.95" | bc)
+        xdotool mousemove --window $AWID $BTN_X $BTN_Y click 1
+    fi
+}
+
+tryCloseAnnotateWindow
 _CLOSED="$EWID"
 while [ "$_CLOSED" = "$EWID" ]; do
     echo "Waiting for export window $EWID to close..."
     sleep 1
     _CLOSED="$(xdotool search --onlyvisible --classname Eeschema | grep $EWID || true)"
+    tryCloseAnnotateWindow
 done
 echo "Export window closed."
 
