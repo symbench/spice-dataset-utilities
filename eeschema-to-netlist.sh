@@ -64,7 +64,7 @@ xdotool key --window $FWID "Return"
 function tryCloseAnnotateWindow() {
     AWID="$(xdotool search --onlyvisible --classname Eeschema | grep -v $EWID | grep -v $MWID | grep -v $FWID || true)"
     echo "Trying to close annotate window. AWID: $AWID"
-    if [[ "$AWID" -ne "" ]]; then
+    if [[ "$AWID" != "" ]]; then
         eval $(xwininfo -id $AWID |
         sed -n -e "s/^ \+Width: \+\([0-9]\+\).*/w=\1/p" \
                -e "s/^ \+Height: \+\([0-9]\+\).*/h=\1/p" )
