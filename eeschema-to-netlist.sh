@@ -6,6 +6,7 @@
 # This code is in the public domain.
 #
 
+pkill eeschema
 set -e
 set -u
 

@@ -1,3 +1,4 @@
+pkill eeschema
 set -e
 set -u
 
