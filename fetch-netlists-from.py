@@ -16,15 +16,17 @@ def is_schematic(filename):
 
 def spawn(cmds):
     print('--> about to run', ' '.join(cmds))
-    return subprocess.run(cmds, stdout=subprocess.PIPE)
+    try:
+        subprocess.run(cmds, stdout=subprocess.PIPE, timeout=5)
+    except:
+        print('Timeout exceeded')
 
 def update_schematic(filename):
     cmds = ['bash', local_file('update-eeschema.sh'), filename]
-    result = spawn(cmds)
-    print(result)
+    spawn(cmds)
 
 def convert_to_netlist(filename):
-    result = spawn(['bash', local_file('eeschema-to-netlist.sh'), filename])
+    spawn(['bash', local_file('eeschema-to-netlist.sh'), filename])
     netlist = filename.replace('.sch', '.cir')
     if path.exists(netlist):
         return (filename, netlist)
@@ -59,7 +61,7 @@ def fetch_repo(url, save_dir):
     print('about to fetch', url)
     with TemporaryDirectory() as work_dir:
         print('work_dir', work_dir)
-        result = spawn(['git', 'clone', '--recurse-submodules', url, work_dir])
+        spawn(['git', 'clone', '--recurse-submodules', url, work_dir])
         print('cloned results to', work_dir)
         schematics = list_schematics(work_dir)
         for schematic in schematics:

@@ -34,20 +34,11 @@ xdotool key --window $MWID alt+t n
 
 # Wait for the export window.
 EWID=""
-if [ "$EWID" = "" ]; then
+while [ "$EWID" = "" ]; do
     echo "Waiting for export window..."
     sleep 1
     EWID=$(xdotool search --onlyvisible --sync --classname Eeschema | grep -v $MWID || true)
-fi
-if [ "$EWID" = "" ]; then
-    echo "Waiting for export window..."
-    sleep 1
-    EWID=$(xdotool search --onlyvisible --sync --classname Eeschema | grep -v $MWID || true)
-fi
-if [ "$EWID" = "" ]; then
-    echo "Could not find export window. Giving up"
-    exit 1
-fi
+done
 echo "Found export window $MWID"
 
 unset x y w h
