@@ -6,6 +6,7 @@ import argparse
 import sys
 import os
 from os import path
+import json
 script_dir = path.dirname(path.realpath(__file__))
 
 def local_file(filename):
@@ -68,16 +69,27 @@ def fetch_repo(url, save_dir):
             update_schematic(schematic)
 
         netlists = (convert_to_netlist(schematic) for schematic in schematics)
-        records = open(path.join(save_dir, 'records.txt'), 'w+')
-        error_file = open(path.join(save_dir, 'errors.txt'), 'w+')
+        records = open(path.join(save_dir, 'records.jsonl'), 'a')
+        error_file = open(path.join(save_dir, 'errors.jsonl'), 'a')
         for (filename, netlist) in netlists:
             success = netlist is not None
+            filename = filename.replace(work_dir, '')
             if success:
                 relative_src = netlist.replace(work_dir, '')
                 dst_file = move_file(netlist, save_dir)
-                records.write(f'{dst_file}\t{relative_src}\t{url}\n')
+                records.write(json.dumps({
+                    'type': 'KiCad',
+                    'schematic': filename,
+                    'netlist_src': relative_src,
+                    'netlist': dst_file,
+                    'repo_url': url,
+                }) + '\n')
             else:
-                error_file.write(f'{filename}\t{url}\n')
+                error_file.write(json.dumps({
+                    'type': 'KiCad',
+                    'schematic': filename,
+                    'repo_url': url,
+                }) + '\n')
         records.close()
         error_file.close()
 
