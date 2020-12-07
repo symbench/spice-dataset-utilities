@@ -24,15 +24,30 @@ while [ "$MWID" = "" ]; do
 done
 echo "Found eeschema window $MWID"
 
+WINDOW_NAME=$(xdotool getwindowname $MWID)
+echo "window name: \"$WINDOW_NAME\" (Making sure it is not \"Not Found\")"
+if [[ "$WINDOW_NAME" == "Not Found" ]]; then
+    exit 1
+fi
+
 xdotool key --window $MWID alt+t n
 
 # Wait for the export window.
 EWID=""
-while [ "$EWID" = "" ]; do
+if [ "$EWID" = "" ]; then
     echo "Waiting for export window..."
     sleep 1
     EWID=$(xdotool search --onlyvisible --sync --classname Eeschema | grep -v $MWID || true)
-done
+fi
+if [ "$EWID" = "" ]; then
+    echo "Waiting for export window..."
+    sleep 1
+    EWID=$(xdotool search --onlyvisible --sync --classname Eeschema | grep -v $MWID || true)
+fi
+if [ "$EWID" = "" ]; then
+    echo "Could not find export window. Giving up"
+    exit 1
+fi
 echo "Found export window $MWID"
 
 unset x y w h

@@ -16,7 +16,7 @@ while [ "$FWID" = "" ]; do
 done
 echo "Found first eeschema window $FWID"
 WINDOW_NAME=$(xdotool getwindowname $FWID)
-echo "window name: [$WINDOW_NAME]"
+echo "window name: \"$WINDOW_NAME\" (Checking for \"Project Rescue Helper\")"
 if [[ "$WINDOW_NAME" == "Project Rescue Helper" ]]; then
     # click in the lower right
     eval $(xwininfo -id $FWID |
