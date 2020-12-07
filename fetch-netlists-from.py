@@ -78,6 +78,8 @@ def fetch_repo(url, save_dir):
                 records.write(f'{dst_file}\t{relative_src}\t{url}\n')
             else:
                 error_file.write(f'{filename}\t{url}\n')
+        records.close()
+        error_file.close()
 
 
 
