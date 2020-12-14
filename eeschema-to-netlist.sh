@@ -10,12 +10,12 @@ pkill eeschema
 set -e
 set -u
 
-SCH=$1
+SCH=$@
 
 Xvfb :99 &
 export DISPLAY=:99
 
-eeschema $SCH &
+eeschema "$SCH" &
 
 MWID=""
 while [ "$MWID" = "" ]; do
