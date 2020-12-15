@@ -17,17 +17,35 @@ export DISPLAY=:99
 
 eeschema "$SCH" &
 
-MWID=""
-while [ "$MWID" = "" ]; do
-    sleep 1
-    MWID=$(xdotool search --onlyvisible --sync --classname Eeschema)
-done
+PREV_IDS="NONE"
+function getEeschemaWindowID() {
+    local NAME=$@
+    local WID=""
+    WID=""
+    while [ "$WID" = "" ]; do
+        echo "Waiting for $NAME window... ($(xdotool search --onlyvisible --sync --classname Eeschema); $PREV_IDS)" 1>&2
+        sleep 1
+        WID=$(xdotool search --onlyvisible --sync --classname Eeschema | grep -v "\($PREV_IDS\)" || true)
+    done
+    PREV_IDS="$PREV_IDS\|$WID"
+    echo "$WID"
+}
+
+MWID=$(getEeschemaWindowID initial)
 echo "Found eeschema window $MWID"
 
 WINDOW_NAME=$(xdotool getwindowname $MWID)
-echo "window name: \"$WINDOW_NAME\" (Making sure it is not \"Not Found\")"
+echo "window name: \"$WINDOW_NAME\" (Try to remap if it is \"Not Found\")"
 if [[ "$WINDOW_NAME" == "Not Found" ]]; then
-    exit 1
+    xdotool key --window $MWID Escape
+
+    RWID=$(getEeschemaWindowID Remap)
+    WINDOW_NAME=$(xdotool getwindowname $RWID)
+    if [[ "$WINDOW_NAME" != "Remap Symbols" ]]; then
+        exit 1
+    fi
+    xdotool key --window $RWID Escape
+    MWID=$(getEeschemaWindowID initial)
 fi
 
 xdotool key --window $MWID alt+t n
