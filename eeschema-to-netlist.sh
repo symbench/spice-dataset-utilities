@@ -23,41 +23,37 @@ function getEeschemaWindowID() {
     local WID=""
     WID=""
     while [ "$WID" = "" ]; do
-        echo "Waiting for $NAME window... ($(xdotool search --onlyvisible --sync --classname Eeschema); $PREV_IDS)" 1>&2
-        sleep 1
+        echo "Waiting for $NAME window... ($(xdotool search --onlyvisible --sync --classname Eeschema | tr '\n' ','); $PREV_IDS)" 1>&2
+        sleep 0.1
         WID=$(xdotool search --onlyvisible --sync --classname Eeschema | grep -v "\($PREV_IDS\)" || true)
     done
-    PREV_IDS="$PREV_IDS\|$WID"
-    echo "$WID"
+    echo "$WID\|$PREV_IDS"
 }
 
-MWID=$(getEeschemaWindowID initial)
-echo "Found eeschema window $MWID"
+PREV_IDS=$(getEeschemaWindowID initial)
+MWID=$(echo $PREV_IDS | cut -d"\\" -f1)
 
 WINDOW_NAME=$(xdotool getwindowname $MWID)
 echo "window name: \"$WINDOW_NAME\" (Try to remap if it is \"Not Found\")"
 if [[ "$WINDOW_NAME" == "Not Found" ]]; then
     xdotool key --window $MWID Escape
 
-    RWID=$(getEeschemaWindowID Remap)
+    PREV_IDS=$(getEeschemaWindowID Remap)
+    RWID=$(echo $PREV_IDS | cut -d"\\" -f1)
     WINDOW_NAME=$(xdotool getwindowname $RWID)
     if [[ "$WINDOW_NAME" != "Remap Symbols" ]]; then
         exit 1
     fi
     xdotool key --window $RWID Escape
-    MWID=$(getEeschemaWindowID initial)
+    PREV_IDS=$(getEeschemaWindowID initial)
+    MWID=$(echo $PREV_IDS | cut -d"\\" -f1)
 fi
 
 xdotool key --window $MWID alt+t n
 
 # Wait for the export window.
-EWID=""
-while [ "$EWID" = "" ]; do
-    echo "Waiting for export window..."
-    sleep 1
-    EWID=$(xdotool search --onlyvisible --sync --classname Eeschema | grep -v $MWID || true)
-done
-echo "Found export window $MWID"
+PREV_IDS=$(getEeschemaWindowID "export")
+EWID=$(echo $PREV_IDS | cut -d"\\" -f1)
 
 unset x y w h
 eval $(xwininfo -id $EWID |
@@ -74,20 +70,15 @@ xdotool mousemove --window $EWID $TAB_X $TAB_Y click 1
 xdotool mousemove --window $EWID $BTN_X $BTN_Y click 1
 
 # Wait for the file dialog window
-FWID=""
-while [ "$FWID" = "" ]; do
-    echo "Waiting for file window..."
-    sleep 1
-    FWID=$(xdotool search --onlyvisible --sync --classname Eeschema | grep -v $MWID | grep -v $EWID || true)
-done
+PREV_IDS=$(getEeschemaWindowID "file dialog")
+FWID=$(echo $PREV_IDS | cut -d"\\" -f1)
 echo "Found file window $FWID"
 
 xdotool key --window $FWID "Return"
 
 # Wait for the window to close
-    # TODO: if not closed, we should check for another window
 function tryCloseAnnotateWindow() {
-    AWID="$(xdotool search --onlyvisible --classname Eeschema | grep -v $EWID | grep -v $MWID | grep -v $FWID || true)"
+    AWID="$(xdotool search --onlyvisible --classname Eeschema | grep -v "\($PREV_IDS\)" || true)"
     echo "Trying to close annotate window. AWID: $AWID"
     if [[ "$AWID" != "" ]]; then
         eval $(xwininfo -id $AWID |
