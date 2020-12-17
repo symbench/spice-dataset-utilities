@@ -10,7 +10,7 @@ def local_file(filename):
 
 def spawn(cmds):
     try:
-        result = subprocess.run(cmds, timeout=5, capture_output=True)
+        result = subprocess.run(cmds, timeout=9, capture_output=True)
         return result.stdout.decode()
     except Exception as e:
         return 'Timeout exceeded'
