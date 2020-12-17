@@ -27,7 +27,7 @@ def update_schematic(filename):
     spawn(cmds)
 
 def dialog_name(filename):
-    print(f'checking {filename}', file=sys.stderr)
+    print(f'checking error for {filename}', file=sys.stderr)
     dialog_name = spawn(['bash', local_file('print-dialog-name.sh'), filename])
     return dialog_name.strip()
 

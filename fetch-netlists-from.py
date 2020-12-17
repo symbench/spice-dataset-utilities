@@ -11,10 +11,6 @@ import itertools
 def is_schematic(filename):
     return filename.endswith('.sch')
 
-def update_schematic(filename):
-    cmds = ['bash', utils.local_file('update-eeschema.sh'), filename]
-    utils.spawn(cmds)
-
 def convert_to_netlist(filename):
     utils.spawn(['bash', utils.local_file('eeschema-to-netlist.sh'), filename])
     netlist = filename.replace('.sch', '.cir')
@@ -49,7 +45,7 @@ def move_file(src_path, target_dir):
 
 def convert_schematics(save_dir, schematics):
     for schematic in schematics:
-        update_schematic(schematic)
+        utils.update_schematic(schematic)
 
     netlists = (convert_to_netlist(schematic) for schematic in schematics)
     return netlists
