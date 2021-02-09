@@ -1,9 +1,9 @@
 from itertools import chain
-from . import helpers as h
+from spice_dataset_utilities.visualize import helpers as h
 
 def component_counts_by_netlist(*files):
-    component_counts = ( len(h.component_lines(c)) for c in files )
-    return count_dict(component_counts)
+    component_counts = ( len(list(h.component_lines(c))) for c in files )
+    return h.count_dict(component_counts)
 
 if __name__ == '__main__':
     import argparse
