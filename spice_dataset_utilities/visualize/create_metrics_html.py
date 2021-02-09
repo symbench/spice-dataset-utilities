@@ -49,6 +49,6 @@ if __name__ == '__main__':
     metrics = {}
     metrics['componentCounts'] = component_counts_by_netlist(*prep(files))
     metrics['componentTypeCounts'] = component_type_counts(*prep(files))
-    metrics['componentTypeCountsByNetlist'] = component_type_counts_by_netlist(*prep(files))
+    metrics['componentTypesByNetlist'] = component_type_counts_by_netlist(*prep(files))
 
     print(create_html(name, metrics))
