@@ -18,6 +18,6 @@ def count_dict(items):
     return counts
 
 def file_contents(f):
-    with open(f, 'r') as f:
-        return f.readlines()
+    with open(f, 'rb') as f:
+        return f.read().decode('utf-8', 'ignore').split('\n')
 
