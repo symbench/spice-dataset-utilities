@@ -1,4 +1,5 @@
 from itertools import chain
+import collections
 
 def component_type(line):
     return line[0].upper()
@@ -15,7 +16,10 @@ def count_dict(items):
     for item in items:
         count = counts.get(item, 0)
         counts[item] = count + 1
-    return counts
+    return sort_dict(counts)
+
+def sort_dict(data):
+    return collections.OrderedDict(sorted(data.items()))
 
 def file_contents(f):
     with open(f, 'rb') as f:
