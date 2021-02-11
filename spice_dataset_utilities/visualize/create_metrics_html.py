@@ -1,6 +1,7 @@
 from spice_dataset_utilities.visualize.component_counts import component_counts_by_netlist
 from spice_dataset_utilities.visualize import helpers as h
 from spice_dataset_utilities.visualize.type_frequencies import component_type_counts, component_type_counts_by_netlist
+from spice_dataset_utilities.visualize.degree_distribution import aggregate_degree_distributions
 import os
 from os import path
 import json
@@ -50,5 +51,6 @@ if __name__ == '__main__':
     metrics['componentCounts'] = component_counts_by_netlist(*prep(files))
     metrics['componentTypeCounts'] = component_type_counts(*prep(files))
     metrics['componentTypesByNetlist'] = component_type_counts_by_netlist(*prep(files))
+    metrics['degreeDistributions'] = aggregate_degree_distributions(*files)
 
     print(create_html(name, metrics))
